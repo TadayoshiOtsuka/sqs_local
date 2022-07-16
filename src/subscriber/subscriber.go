@@ -22,9 +22,11 @@ func (s *Subscriber) Start(ctx context.Context) {
 			log.Println("Receive Message Error: ", err)
 			break
 		}
-		if len(res.Messages) > 0 {
-			log.Println("Receive Message Body is:", *res.Messages[0].Body)
+		if len(res.Messages) <= 0 {
+			log.Println("No Message Contains")
+			continue
 		}
-
+		log.Println("Receive Message Body is:", *res.Messages[0].Body)
+		s.queueService.Delete(ctx, res.Messages[0].ReceiptHandle)
 	}
 }

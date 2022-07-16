@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  subscriber:
+  pub-sub:
     build:
       context: .
       dockerfile: Dockerfile
