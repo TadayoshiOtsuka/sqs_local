@@ -15,16 +15,6 @@ func NewSubscriber(queue services.QueueService) *Subscriber {
 	return &Subscriber{queueService: queue}
 }
 
-func (s *Subscriber) SendMessages(ctx context.Context, messages []string) {
-	for _, v := range messages {
-		_, err := s.queueService.Send(ctx, v)
-		if err != nil {
-			log.Println("Send Message Error: ", err)
-			break
-		}
-	}
-}
-
 func (s *Subscriber) Start(ctx context.Context) {
 	for {
 		res, err := s.queueService.Receive(ctx)

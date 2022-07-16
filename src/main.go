@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/TadayoshiOtsuka/sqs_local/src/publisher"
 	"github.com/TadayoshiOtsuka/sqs_local/src/services"
 	"github.com/TadayoshiOtsuka/sqs_local/src/subscriber"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -14,11 +15,14 @@ import (
 func main() {
 	ctx := context.Background()
 	resolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-		return aws.Endpoint{
-			PartitionID:   "aws",
-			URL:           os.Getenv("QUEUE_URL"),
-			SigningRegion: os.Getenv("AWS_REGION"),
-		}, nil
+		if os.Getenv("ENV") != "production" {
+			return aws.Endpoint{
+				PartitionID:   "aws",
+				URL:           os.Getenv("QUEUE_URL"),
+				SigningRegion: os.Getenv("AWS_REGION"),
+			}, nil
+		}
+		return aws.Endpoint{}, &aws.EndpointNotFoundError{}
 	})
 	cfg, err := config.LoadDefaultConfig(ctx, config.WithEndpointResolverWithOptions(resolver))
 	if err != nil {
@@ -26,6 +30,7 @@ func main() {
 	}
 
 	subscriber := subscriber.NewSubscriber(*services.NewQueueService(cfg))
-	subscriber.SendMessages(ctx, []string{"hello", "world"})
+	publisher := publisher.NewPublisher(*services.NewQueueService(cfg))
+	publisher.SendMessages(ctx, []string{"hello", "world"})
 	subscriber.Start(ctx)
 }

@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -43,6 +44,7 @@ func (s *QueueService) Receive(ctx context.Context) (*sqs.ReceiveMessageOutput, 
 		return nil, err
 	}
 	if len(res.Messages) <= 0 {
+		log.Println("No Message Contains")
 		return res, nil
 	}
 	if err := s.delete(ctx, res.Messages[0].ReceiptHandle); err != nil {
