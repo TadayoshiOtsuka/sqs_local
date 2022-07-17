@@ -19,8 +19,7 @@ func (s *Subscriber) Start(ctx context.Context) {
 	for {
 		res, err := s.queueService.Receive(ctx)
 		if err != nil {
-			log.Println("Receive Message Error: ", err)
-			break
+			log.Panicln("Receive Message Error: ", err)
 		}
 		if len(res.Messages) <= 0 {
 			log.Println("No Message Contains")

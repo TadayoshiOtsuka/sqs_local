@@ -19,7 +19,7 @@ func (s *Publisher) SendMessages(ctx context.Context, messages []string) {
 	for _, v := range messages {
 		_, err := s.queueService.Send(ctx, v)
 		if err != nil {
-			log.Println("Send Message Error: ", err)
+			log.Panicln("Send Message Error: ", err)
 			break
 		}
 	}

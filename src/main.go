@@ -26,7 +26,7 @@ func main() {
 	})
 	cfg, err := config.LoadDefaultConfig(ctx, config.WithEndpointResolverWithOptions(resolver))
 	if err != nil {
-		log.Fatalf("Failed To Load Configuration %v", err)
+		log.Panicln("Failed To Load Configuration ", err)
 	}
 
 	queueService := services.NewQueueService(cfg)
