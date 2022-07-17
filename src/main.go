@@ -29,8 +29,9 @@ func main() {
 		log.Fatalf("Failed To Load Configuration %v", err)
 	}
 
-	subscriber := subscriber.NewSubscriber(*services.NewQueueService(cfg))
-	publisher := publisher.NewPublisher(*services.NewQueueService(cfg))
+	queueService := services.NewQueueService(cfg)
+	subscriber := subscriber.NewSubscriber(*queueService)
+	publisher := publisher.NewPublisher(*queueService)
 	publisher.SendMessages(ctx, []string{"hello", "world"})
 	subscriber.Start(ctx)
 }
