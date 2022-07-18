@@ -2,9 +2,11 @@ package services
 
 import (
 	"context"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
@@ -13,8 +15,12 @@ type QueueService struct {
 	queueUrl string
 }
 
-func NewQueueService(cfg aws.Config) *QueueService {
-	c := sqs.NewFromConfig(cfg)
+func NewQueueService() *QueueService {
+	cfg, err := initAwsConfig()
+	if err != nil {
+		log.Panicln("Failed To Load Configuration ", err)
+	}
+	c := sqs.NewFromConfig(*cfg)
 	url := os.Getenv("QUEUE_URL")
 	return &QueueService{client: c, queueUrl: url}
 }
@@ -56,4 +62,24 @@ func (s *QueueService) Delete(ctx context.Context, receiptHandle *string) error 
 	}
 
 	return nil
+}
+
+func initAwsConfig() (*aws.Config, error) {
+	resolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		if os.Getenv("ENV") != "production" {
+			return aws.Endpoint{
+				PartitionID:   "aws",
+				URL:           os.Getenv("QUEUE_URL"),
+				SigningRegion: os.Getenv("AWS_REGION"),
+			}, nil
+		}
+		return aws.Endpoint{}, &aws.EndpointNotFoundError{}
+	})
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithEndpointResolverWithOptions(resolver))
+	if err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
 }
